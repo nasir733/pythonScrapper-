@@ -12,8 +12,7 @@ def extract_relator(html):
     data={}
     agentExperience=''
     agentGroup=''
-    
-    soup = html.find('ul')
+
     title = html.find('div',class_="agent-name")
     phone_number = html.find('div',class_="agent-phone")
     sold_count = html.find('span',class_='sale-sold-count')
@@ -34,7 +33,7 @@ def extract_relator(html):
     if phone_number is not None: 
     
         if phone_number.string is not None:
-            phone_number.string = phone_number.string.replace(',','')
+            phone_number = phone_number.string.replace(',','')
     if sold_count is not None : 
         if sold_count.string is not None:
             sold_count = sold_count.string.replace(',','')
@@ -64,7 +63,7 @@ def extract_relator(html):
 
 
 def extract_relators():
-    results =list()
+    results =list() # array in javascript and list in python  ['','']
     # file = open('test.csv','w')
     # file.write('title,phoneNumber,soldCount,saleSoldCount,agentExper,agentGroup\n')
     headers = {
@@ -72,19 +71,18 @@ def extract_relators():
     "Accept-Encoding": "*",
     "Connection": "keep-alive"
 }
-    with open('test2.csv', "w", encoding="utf-8") as file:        
+    with open('test2.csv', "w", encoding="utf-8") as file:      
+        file.write('title,phoneNumber,soldCount,saleSoldCount,agentExper,agentGroup\n')  
         for i in range(MAX_PAGE_SIZE):
             print(f'scrapping page {i} .....')
-            response = get(f'{base_url}{i}',headers=headers)  
+            response = get(f'{base_url}{i}',headers=headers)
+            # `${asd}` this is in js and f'{}' is in python   
             print(response.status_code)
 
             if response.status_code != 200: 
                 print('Cant Request the web page ')
             else :
                 soup=BeautifulSoup(response.text,"html.parser")
-                results =soup.find("div",{"class":"cardWrapper"})
-                unorderdlist = results.find('ul')
-
                 cards = soup.find_all("div",class_="agent-list-card")
        
 
@@ -94,15 +92,9 @@ def extract_relators():
                     relaters_data = extract_relator(card)
     
                     local_result.append(relaters_data)
-            
-            # print(local_result)
-            # results.append(*local_result)
-                for result in local_result : 
-               
-                        file.write('title,phoneNumber,soldCount,saleSoldCount,agentExper,agentGroup\n')
+                for result in local_result :                     
                         file.write(f"{result['title']},{result['phoneNumber']},{result['soldCount']},{result['saleSoldCount']},{result['agentExper']},{result['agentGroup']}\n")
-            
-                # 
+
            
             
                 print(f'scraping page {i} is done')
