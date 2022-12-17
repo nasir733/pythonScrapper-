@@ -1,7 +1,7 @@
 from requests import get 
 from bs4 import BeautifulSoup
 
-MAX_PAGE_SIZE = 5
+MAX_PAGE_SIZE = 365
 page_size =1
 
 base_url = f'https://www.realtor.com/realestateagents/fort-lauderdale_fl/pg-'
@@ -25,15 +25,22 @@ def extract_relator(html):
 
     if agent_group_soup:
         agentGroup = html.find('span').string
+    
+    if title is not None: 
 
-    if title.string is not None:
-        title = title.string.replace(',','')
-    if phone_number.string is not None:
-        phone_number.string = phone_number.string.replace(',','')
-    if sale_sold_cound.string is not None:
-        sold_count = sold_count.string.replace(',','')
-    if sale_sold_cound.string is not None:
-        sale_sold_cound = sale_sold_cound.string.replace(',','')
+        if title.string is not None:
+            title = title.string.replace(',','')
+    
+    if phone_number is not None: 
+    
+        if phone_number.string is not None:
+            phone_number.string = phone_number.string.replace(',','')
+    if sold_count is not None : 
+        if sold_count.string is not None:
+            sold_count = sold_count.string.replace(',','')
+    if sale_sold_cound:
+        if sale_sold_cound.string is not None:
+         sale_sold_cound = sale_sold_cound.string.replace(',','')
 
 
     
@@ -58,43 +65,53 @@ def extract_relator(html):
 
 def extract_relators():
     results =list()
-    file = open('test.csv','w')
-    file.write('title,phoneNumber,soldCount,saleSoldCount,agentExper,agentGroup\n')
-            
-    for i in range(MAX_PAGE_SIZE):
-        print(f'scrapping page {i} .....')
-        response = get(f'{base_url}{i}')  
-        print(response.status_code)
+    # file = open('test.csv','w')
+    # file.write('title,phoneNumber,soldCount,saleSoldCount,agentExper,agentGroup\n')
+    headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:66.0) Gecko/20100101 Firefox/66.0",
+    "Accept-Encoding": "*",
+    "Connection": "keep-alive"
+}
+    with open('test2.csv', "w", encoding="utf-8") as file:        
+        for i in range(MAX_PAGE_SIZE):
+            print(f'scrapping page {i} .....')
+            response = get(f'{base_url}{i}',headers=headers)  
+            print(response.status_code)
 
-        if response.status_code != 200: 
-            print('Cant Request the web page ')
-        else :
-            soup=BeautifulSoup(response.text,"html.parser")
-            results =soup.find("div",{"class":"cardWrapper"})
-            unorderdlist = results.find('ul')
+            if response.status_code != 200: 
+                print('Cant Request the web page ')
+            else :
+                soup=BeautifulSoup(response.text,"html.parser")
+                results =soup.find("div",{"class":"cardWrapper"})
+                unorderdlist = results.find('ul')
 
-            cards = soup.find_all("div",class_="agent-list-card")
+                cards = soup.find_all("div",class_="agent-list-card")
        
 
-            local_result =[]       
-            for card in cards: 
+                local_result =[]       
+                for card in cards: 
       
-                relaters_data = extract_relator(card)
+                    relaters_data = extract_relator(card)
     
-                local_result.append(relaters_data)
+                    local_result.append(relaters_data)
             
             # print(local_result)
             # results.append(*local_result)
-            for result in local_result : 
+                for result in local_result : 
+               
+                        file.write('title,phoneNumber,soldCount,saleSoldCount,agentExper,agentGroup\n')
+                        file.write(f"{result['title']},{result['phoneNumber']},{result['soldCount']},{result['saleSoldCount']},{result['agentExper']},{result['agentGroup']}\n")
             
-                file.write(f"{result['title']},{result['phoneNumber']},{result['soldCount']},{result['saleSoldCount']},{result['agentExper']},{result['agentGroup']}\n")
+                # 
            
             
-            print(f'scraping page {i} is done')
+                print(f'scraping page {i} is done')
     
+ 
+
     print(results)
    
-    file.close()
+    # file.close()
 
          
 
