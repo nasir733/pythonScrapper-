@@ -1,7 +1,7 @@
 from requests import get 
 from bs4 import BeautifulSoup
 
-MAX_PAGE_SIZE = 1
+MAX_PAGE_SIZE = 150
 page_size =1
 
 base_url = f'https://www.realtor.com/realestateagents/fort-lauderdale_fl/pg-'
@@ -54,13 +54,16 @@ def extract_relators():
             unorderdlist = results.find('ul')
 
             cards = soup.find_all("div",class_="agent-list-card")
-            file = open('test.csv','wiviialkj')
-            file.write('title,phoneNumber,soldCount,agentExper,agentGroup')
+            file = open('test.csv','w')
+            file.write('title,phoneNumber,soldCount,saleSoldCount,agentExper,agentGroup\n')
 
 
             for card in cards: 
       
-                extract_relator(card)
+                relaters_data = extract_relator(card)
+                file.write(f"{relaters_data['title']},{relaters_data['phoneNumber']},{relaters_data['soldCount']},{relaters_data['saleSoldCount']},{relaters_data['agentExper']},{relaters_data['agentGroup']}\n")
+              
+
 
           
 
